@@ -11,12 +11,19 @@ const CHANGE_OPENED_STATUS = 'CHANGE_OPENED_STATUS';
 const SET_FIRST_SELECTED_NAME = 'SET_FIRST_SELECTED_NAME';
 const CONFIRM_EQUAL_IMG = 'CONFIRM_EQUAL_IMG';
 const CLOSE_WRONG_CHOOSED = 'CLOSE_WRONG_CHOOSED';
+const BLOCK_TILES = 'BLOCK_TILES';
+const WATCH_ALL_TILES = 'WATCH_ALL_TILES';
+const START_GAME = 'START_GAME';
+const FINISH_GAME = 'FINISH_GAME'
 
 const changeOpenedStatus = (id) => ({ type: CHANGE_OPENED_STATUS, id })
 const setFirstSelectedName = (name) => ({ type: SET_FIRST_SELECTED_NAME, name })
 const confirmOpenedImgAsEqual = (name) => ({ type: CONFIRM_EQUAL_IMG, name })
 const closeWrongChoosedImg = (prevName, thisName) => ({ type: CLOSE_WRONG_CHOOSED, prevName, thisName })
-
+const blockTiles = (value) => ({ type: BLOCK_TILES, value })
+const watchAllTiles = (value) => ({type: WATCH_ALL_TILES, value})
+const startNewGame = () => ({type: START_GAME})
+const finishGame = () => ({type: FINISH_GAME})
 const initialState = {
     tiles: [
         { id: 1, name: 'html', isOpened: false, isConfirmed: false, src: html },
@@ -37,11 +44,25 @@ const initialState = {
         { id: 16, name: 'graphql', isOpened: false, isConfirmed: false, src: graphql }
     ],
     gameStarted: false,
-    firstSelectedName: null
+    gameFinished: false,
+    firstSelectedName: null,
+    tilesBlocked: true,
 }
 
 const gameReducer = (state = initialState, action) => {
     switch (action.type) {
+        case START_GAME: {
+            return {
+                ...state,
+                gameStarted: true
+            }
+        }
+        case FINISH_GAME: {
+            return {
+                ...state,
+                gameFinished: true
+            }
+        }
         case CHANGE_OPENED_STATUS: {
             return {
                 ...state,
@@ -77,7 +98,7 @@ const gameReducer = (state = initialState, action) => {
             return {
                 ...state,
                 tiles: [...state.tiles.map(elem => {
-                    if(elem.isConfirmed){
+                    if (elem.isConfirmed) {
                         return elem
                     }
                     else if (elem.name === action.prevName || elem.name === action.thisName) {
@@ -89,26 +110,56 @@ const gameReducer = (state = initialState, action) => {
                 firstSelectedName: null
             }
         }
+        case BLOCK_TILES: {
+            return {
+                ...state,
+                tilesBlocked: action.value
+            }
+        }
+        case WATCH_ALL_TILES: {
+            return {
+                ...state,
+                tiles: [...state.tiles.map(elem => {
+                    elem.isOpened = action.value
+                    return elem;
+                })]
+            }
+        }
         default:
             return state;
+    }
+}
+
+export const startGame = () => {
+    return (dispatch) => {
+        dispatch(watchAllTiles(true));
+        setTimeout(() => {
+            dispatch(blockTiles(false));
+            dispatch(watchAllTiles(false));
+        }, 3000);
+        dispatch(startNewGame());
     }
 }
 
 export const userMove = (id, name) => {
     return (dispatch, getState) => {
         const firstSelectedName = getState().game.firstSelectedName;
+        const tilesBlocked = getState().game.tilesBlocked;
         dispatch(changeOpenedStatus(id))
+        dispatch(blockTiles(true));
         if (firstSelectedName === null) {
             dispatch(setFirstSelectedName(name))
+            dispatch(blockTiles(false));
         }
         else if (firstSelectedName === name) {
-            dispatch(confirmOpenedImgAsEqual(name))
+            dispatch(confirmOpenedImgAsEqual(name));
+            dispatch(blockTiles(false));
         }
         else {
             setTimeout(() => {
-                alert('Попробуйте еще раз!')
-                dispatch(closeWrongChoosedImg(firstSelectedName, name))
-            }, 100);
+                dispatch(closeWrongChoosedImg(firstSelectedName, name));
+                dispatch(blockTiles(false));
+            }, 600)
         }
         const result = getState().game.tiles.every(elem => {
             if (elem.isConfirmed) {
@@ -118,7 +169,7 @@ export const userMove = (id, name) => {
             }
         })
         if (result) {
-            alert('Вы победили')
+            dispatch(finishGame())
         }
     }
 }

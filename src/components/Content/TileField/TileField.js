@@ -4,10 +4,13 @@ import defaultTile from '../../../assets/images/defaultTile.png'
 
 const TileField = (props) => {
     return (
-        <div 
-        onClick={props.userMove} >
+        <button
+            className={styles.tileButton}
+            onClick={props.userMove}
+            disabled={props.tilesBlocked ? true : false}
+        >
             {props.isOpened ? <img src={props.src} /> : <img src={defaultTile} />}
-        </div>
+        </button>
     )
 }
 

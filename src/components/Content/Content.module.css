@@ -4,10 +4,49 @@
 
 .gameField{
     padding: 15px;
-    margin: 15px;
     display: inline-flex;
     max-width: 400px;
     flex-wrap: wrap;
     border: 2px solid #333333;
     border-radius: 5%;
+}
+
+.startButton{
+    margin-top: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    outline: none;
+    border: none;
+    padding: 10px 40px;
+    border-radius: 20px;
+    background-color: #FEEE00;
+    box-shadow: 0 2px 8px #333333;
+    transition: 0.15s;
+}
+
+.startButton:hover{
+    background-color: #FFB400;
+    cursor: pointer;
+}
+.startButton:focus{
+    position: relative;
+    top: 2px;
+    cursor: pointer;
+}
+
+.startButton:disabled{
+    background-color: #EBEBEB;
+}
+
+.startButton:disabled:hover{
+cursor: not-allowed;
+}
+
+.gameFinished{
+    padding: 0;
+    margin: 0;
+    height: 40px;
+    line-height: 40px;
+    font-weight: bold;
 }

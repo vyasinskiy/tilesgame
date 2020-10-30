@@ -2,12 +2,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import TileField from './TileField/TileField';
 import styles from './Content.module.css';
-import { userMove } from '../../redux/gameReducer'
+import { userMove, startGame } from '../../redux/gameReducer'
 
 const mapStatoToProps = (state) => {
     return {
         tiles: state.game.tiles,
-        gameStarted: state.game.gameStarted
+        gameStarted: state.game.gameStarted,
+        gameFinished: state.game.gameFinished,
+        tilesBlocked: state.game.tilesBlocked
     }
 }
 
@@ -26,14 +28,28 @@ class Content extends React.Component {
     render() {
         return (
             <div className={styles.content} >
+                <div className={styles.gameFinished} >
+                    {this.props.gameFinished ? 'Вы победили' : null}
+                </div>
                 <GameField
                     mixedTiles={this.mixedTiles}
                     userMove={this.props.userMove}
+                    tilesBlocked={this.props.tilesBlocked}
                 />
+                <div>
+                    <button
+                        className={styles.startButton}
+                        onClick={this.props.startGame}
+                        disabled={this.props.gameStarted ? true : false}
+                    >
+                        Start
+                    </button>
+                </div>
             </div>
         )
     }
 }
+
 
 const GameField = (props) => {
     const tilesToRender = props.mixedTiles.map(elem => {
@@ -46,6 +62,7 @@ const GameField = (props) => {
                 isOpened={elem.isOpened}
                 isConfirmed={elem.isConfirmed}
                 userMove={() => props.userMove(elem.id, elem.name)}
+                tilesBlocked={props.tilesBlocked}
             />
         )
     })
@@ -56,4 +73,4 @@ const GameField = (props) => {
     )
 }
 
-export default connect(mapStatoToProps, { userMove })(Content);
+export default connect(mapStatoToProps, { userMove, startGame })(Content);
